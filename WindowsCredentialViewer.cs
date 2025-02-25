@@ -11,7 +11,7 @@ class ListCred
 {
     static void Main(string[] args)
     {
-        string credentialName = "";
+        string credentialName = "mycredential";
         if (string.IsNullOrEmpty(credentialName))
         {
             if (args.Length != 1)
@@ -24,7 +24,7 @@ class ListCred
         }
 
         var value = GuiLabs.CredentialManager.GetCredentialValue(credentialName);
-        Console.WriteLine(value);
+        Console.WriteLine(value[0]);
     }
 }
 
@@ -36,7 +36,7 @@ namespace GuiLabs
     /// </summary>
     public class CredentialManager
     {
-        public static string GetCredentialValue(string name)
+        public static string[] GetCredentialValue(string name)
         {
             if (!CredRead(name, CredentialType.Generic, 0, out IntPtr credentialPtr))
             {
@@ -46,10 +46,12 @@ namespace GuiLabs
             using (var handle = new CriticalCredentialHandle(credentialPtr))
             {
                 var credential = handle.GetCredential();
+                
                 if (credential.CredentialBlobSize > 0)
                 {
-                    var password = Marshal.PtrToStringUni(credential.CredentialBlob, credential.CredentialBlobSize / 2);
-                    return password;
+                    string password = Marshal.PtrToStringUni(credential.CredentialBlob, credential.CredentialBlobSize/2);
+                    string[] value = [credential.UserName, password];
+                    return value;
                 }
             }
 
